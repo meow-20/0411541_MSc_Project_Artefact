@@ -1,605 +1,405 @@
-# FingerPay
+# FingerPay 💳🖐️
 
-FingerPay is a full-stack fintech application that combines a React Native mobile app, a Node.js/Express backend, MongoDB, and a Python service for fingerprint sensor integration using the AS608 biometric module. The platform supports user and merchant flows, payments, account verification, merchant withdrawals, and biometric identity verification.
-
----
-
-## Overview
-
-This project is built as a multi-part system:
-
-- **Mobile frontend** for customers and merchants
-- **Node.js backend** for authentication, user management, merchant operations, and API endpoints
-- **MongoDB database** for persistent application data
-- **Python biometric service** for communicating with the AS608 fingerprint sensor and processing enrollment or verification requests
-
-The goal of FingerPay is to provide a secure and modern digital payment experience with biometric verification support for merchant-side customer validation.
+**Biometric Fingerprint Payment System** — a full-stack mobile payment platform that lets customers pay using their fingerprint instead of cash, cards, or phones. Built with React Native (Expo), Node.js/Express, MongoDB, and an AS608 optical fingerprint sensor driven by a Python service.
 
 ---
 
-## Features
+## 📸 Screenshots
 
-### Mobile app
-- User authentication
-- Role-aware UI for merchants and regular users
-- Account verification
-- Email OTP verification
-- Payment screen
-- Transaction history
-- Merchant wallet withdrawal
-- Merchant fingerprint verification screen
-- Profile and settings screens
-- Modern merchant bottom tab navigation
-
-### Backend
-- JWT-based authentication
-- User profile endpoints
-- Merchant wallet balance endpoint
-- Merchant withdrawal endpoint
-- Credential verification endpoint
-- Biometric enrollment trigger endpoint
-
-### Python biometric service
-- Connects to **AS608 fingerprint sensor**
-- Handles fingerprint enrollment
-- Can be extended for verification or template capture
-- Intended to act as the bridge between hardware and backend API logic
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="FingerPay/Screenshots/CustomerSignUpScreen.jpeg" width="150" alt="Customer Sign Up"/></td>
+      <td><img src="FingerPay/Screenshots/CustomerLoginScreen.jpeg" width="150" alt="Customer Login"/></td>
+      <td><img src="FingerPay/Screenshots/MerchantLoginScreen.jpeg" width="150" alt="Merchant Login"/></td>
+      <td><img src="FingerPay/Screenshots/MerchantSignUpScreen.jpeg" width="150" alt="Merchant Sign Up"/></td>
+    </tr>
+    <tr>
+      <td align="center">Customer Sign Up</td>
+      <td align="center">Customer Login</td>
+      <td align="center">Merchant Login</td>
+      <td align="center">Merchant Sign Up</td>
+    </tr>
+    <tr>
+      <td><img src="FingerPay/Screenshots/CustomerHomeScreen.jpeg" width="150" alt="Customer Home"/></td>
+      <td><img src="FingerPay/Screenshots/WalletScreen.jpeg" width="150" alt="Wallet"/></td>
+      <td><img src="FingerPay/Screenshots/PayPointsScreen.jpeg" width="150" alt="Pay Points"/></td>
+      <td><img src="FingerPay/Screenshots/CustomerProfileScreen.jpeg" width="150" alt="Customer Profile"/></td>
+    </tr>
+    <tr>
+      <td align="center">Customer Home</td>
+      <td align="center">Wallet</td>
+      <td align="center">Pay Points</td>
+      <td align="center">Profile</td>
+    </tr>
+    <tr>
+      <td><img src="FingerPay/Screenshots/PaymentScreen.jpeg" width="150" alt="Merchant Terminal"/></td>
+      <td><img src="FingerPay/Screenshots/MerchantTransactionHistoryScreen.jpeg" width="150" alt="Transaction History"/></td>
+      <td><img src="FingerPay/Screenshots/WithdrawScreen.jpeg" width="150" alt="Withdraw"/></td>
+      <td><img src="FingerPay/Screenshots/FingerprintVerifyScreen.jpeg" width="150" alt="Fingerprint Verify"/></td>
+    </tr>
+    <tr>
+      <td align="center">Merchant Terminal</td>
+      <td align="center">Transaction History</td>
+      <td align="center">Withdraw</td>
+      <td align="center">Fingerprint Verify</td>
+    </tr>
+  </table>
+</div>
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
-```text
-React Native App
-   |
-   | HTTP requests
-   v
-Node.js / Express API
-   |
-   | MongoDB queries
-   v
-MongoDB
+FingerPay follows a **three-tier architecture**:
 
-Node.js / Express API
-   |
-   | triggers / communicates
-   v
-Python Fingerprint Service
-   |
-   | serial/UART
-   v
-AS608 Fingerprint Sensor
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    React Native / Expo App                       │
+│              (Customer & Merchant Interfaces)                    │
+├─────────────────────────────────────────────────────────────────┤
+│                    Node.js / Express API                         │
+│         (REST — Auth, Users, Merchants, Payments, etc.)          │
+├──────────────────────────┬──────────────────────────────────────┤
+│        MongoDB           │        Python Flask API              │
+│   (Users, Merchants,     │   (AS608 Sensor Control —            │
+│    Transactions, etc.)   │    Enrol, Match, Delete)             │
+└──────────────────────────┴──────────────────────────────────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    │   AS608 Fingerprint  │
+                    │   Sensor (USB/UART)  │
+                    └─────────────────────┘
 ```
 
-The React Native app handles the mobile experience, the Express backend manages business logic and API endpoints, MongoDB stores application data, and the Python service interacts with the AS608 sensor over serial communication, which is a common pattern for Python-based fingerprint sensor integrations [web:738][web:740].
+### Components
+
+| Layer | Technology | Location |
+|-------|-----------|----------|
+| **Mobile App** | React Native (Expo SDK 49) | `frontend/` |
+| **Backend API** | Node.js + Express | `backend/` |
+| **Database** | MongoDB (Mongoose ODM) | `backend/` config |
+| **Fingerprint Service** | Python 3 + Flask + PySerial | `AS608/` |
 
 ---
 
-## Tech stack
+## ✨ Features
 
-### Frontend
-- React Native
-- Expo
-- React Navigation
-- AsyncStorage
-- Expo Local Authentication
-- React Native OTP Entry
-- Expo Vector Icons
+### 👤 Customer
+- **Sign Up / Login** with email & password
+- **Email verification** via OTP code (6-digit, 10-minute expiry)
+- **Dashboard** — view balance (toggleable), recent transactions, greetings
+- **Wallet** — top up funds via card or bank transfer
+- **Pay Points** — find nearby merchants to pay
+- **Biometric payments** — pay at any merchant terminal using your fingerprint
+- **Transaction history** — full list of past payments with merchant details
+- **Profile management**
 
-### Backend
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JSON Web Token (JWT)
+### 🏪 Merchant
+- **Separate merchant registration** (company name, VAT number, license number, etc.)
+- **Payment terminal** — enter amount, verify customer fingerprint, process transaction
+- **Quick amount presets** — £5, £10, £20, £50
+- **Transaction history** — see all customer payments with customer details
+- **Withdraw funds** — move earnings from merchant wallet
+- **Fingerprint verification** — verify customer identity independently
+- **Profile page** with business details
 
-### Python biometric layer
-- Python 3
-- PySerial
-- AS608-compatible fingerprint communication library or custom serial logic
-
-The AS608 is typically used over UART/serial communication, and Python integrations often rely on serial communication layers or libraries adapted for the sensor’s command protocol [web:736][web:740].
-
----
-
-## Repository structure
-
-```bash
-fingerpay/
-├── frontend/
-│   ├── assets/
-│   ├── components/
-│   ├── config/
-│   │   └── env.js
-│   ├── context/
-│   │   └── AuthContext.js
-│   ├── navigation/
-│   │   └── AppNavigator.js
-│   ├── screens/
-│   │   ├── PaymentScreen.js
-│   │   ├── HistoryScreen.js
-│   │   ├── WithdrawScreen.js
-│   │   ├── ProfileScreen.js
-│   │   ├── VerifyAccountScreen.jsx
-│   │   └── VerifyFingerPrintScreen.js
-│   ├── App.js
-│   └── package.json
-│
-├── backend/
-│   ├── models/
-│   ├── routes/
-│   ├── middleware/
-│   ├── controllers/
-│   ├── server.js
-│   └── package.json
-│
-├── AS608/
-│   ├── mongo_enroll.py
-|   ├── mongo_match.py
-│   ├── requirements.txt
-│   └── app.py
-│
-└── README.md
-```
-
-Full-stack repositories are usually easier to maintain when frontend, backend, and Python or hardware-integration services are separated into clear directories with their own entry points and dependency files [web:733][web:735].
+### 🔬 Biometric (AS608 Sensor)
+- **Fingerprint enrolment** — capture finger twice, generate template, store in MongoDB + sensor flash
+- **Fingerprint matching** — compare live scan against all enrolled templates in DB
+- **Sensor health check** — diagnostic endpoint
+- **Delete all templates** — clear sensor flash
+- **Raw image capture** — optional display of scanned fingerprint image
 
 ---
 
-## How the system works
-
-### 1. Mobile app
-The React Native app is used by both customers and merchants. Merchants can verify customers, withdraw funds, and manage account-related flows.
-
-### 2. Backend API
-The Express backend authenticates users, stores user and merchant data, updates balances, verifies credentials, and exposes REST endpoints used by the mobile app.
-
-### 3. Python fingerprint layer
-The Python service communicates with the AS608 fingerprint sensor through a serial/UART connection. It can be used to enroll fingerprints, verify users, or capture biometric templates before sending results back to the backend.
-
-### 4. MongoDB
-MongoDB stores users, merchants, balances, settings, and any future transaction or biometric metadata you choose to persist.
-
----
-
-## Hardware requirements
-
-To use the fingerprint part of this project, you need:
-
-- AS608 fingerprint sensor
-- USB-to-TTL serial adapter or supported microcontroller bridge
-- A machine capable of running the Python service
-- Correct serial/UART wiring
-
-Typical AS608 integrations use UART communication and often initialize the sensor at `57600` baud in example setups, though the exact wiring and serial behavior depend on the board or adapter being used [web:732][web:736].
-
----
-
-## AS608 wiring notes
-
-Common serial wiring conventions:
-
-- **AS608 TX** → host RX
-- **AS608 RX** → host TX
-- **VCC** → power
-- **GND** → ground
-
-If you are connecting through a microcontroller or adapter, double-check the labels because TX/RX markings can sometimes be confusing in real hardware setups [web:744].
-
----
-
-## Frontend setup
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js
-- npm or yarn
-- Expo CLI
-- Android Studio emulator or physical device
-- Expo Go (optional)
 
-### Install dependencies
+- **Node.js** >= 18
+- **Python** >= 3.9
+- **MongoDB** (local or Atlas)
+- **AS608 Fingerprint Sensor** (USB, CP210x / Silicon Labs UART bridge)
+- **Expo CLI** (`npm install -g expo-cli`)
+- **Android/iOS device** or emulator
 
-```bash
-cd frontend
-npm install
-```
-
-### Install additional packages if needed
+### 1. Clone & Install
 
 ```bash
-npm install @react-native-async-storage/async-storage
-npm install @react-navigation/native
-npm install @react-navigation/bottom-tabs
-npm install react-native-screens react-native-safe-area-context
-npm install react-native-otp-entry
-npx expo install expo-local-authentication
-npx expo install @expo/vector-icons
-```
-
-### Configure API base URL
-
-```js
-// frontend/config/env.js
-export const API_BASE_URL = "http://YOUR_LOCAL_IP:5000";
-```
-
-If testing on a physical device, use your computer’s LAN IP instead of `localhost`, because mobile devices do not resolve your development machine’s localhost the same way local desktop apps do [web:725].
-
-### Run the frontend
-
-```bash
-npx expo start
-```
-
----
-
-## Backend setup
-
-### Prerequisites
-- Node.js
-- MongoDB connection string
-- npm or yarn
-
-### Install dependencies
-
-```bash
+# Backend
 cd backend
 npm install
+
+# Frontend
+cd ../frontend
+npm install
+
+# Python fingerprint service
+cd ../AS608
+pip install -r requirements.txt
+pip install -e .           # install the 'fingerprint' package
 ```
 
-### Example dependencies
+### 2. Configure Environment
 
-```bash
-npm install express mongoose cors dotenv jsonwebtoken bcryptjs
-```
-
-### Example environment file
-
+**Backend** (`backend/.env`):
 ```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/fingerpay
-JWT_SECRET=your_secret_key
-PYTHON_SERVICE_URL=http://127.0.0.1:8000
+MONGODB_URI=mongodb://localhost:27017/fingerpay
+JWT_SECRET=your-secret-key-here
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
 ```
 
-### Start backend server
+**Frontend** (`frontend/src/config/env.js`):
+```js
+export const API_BASE_URL = 'http://<your-local-ip>:5000/api';
+```
 
+### 3. Run the Stack
+
+**Terminal 1 — Backend:**
 ```bash
-npm run dev
+cd backend
+npm run dev        # nodemon, runs on :5000
 ```
 
-or
-
+**Terminal 2 — Python Fingerprint Service:**
 ```bash
-node server.js
+cd AS608
+python app.py      # Flask, runs on :5001
 ```
 
----
-
-## Python fingerprint service setup
-
-### Prerequisites
-- Python 3.9+
-- pip
-- Serial access to the AS608 sensor
-
-### Install Python dependencies
-
+**Terminal 3 — Mobile App:**
 ```bash
-cd python
-pip install -r requirements.txt
-```
-
-### Example `requirements.txt`
-
-```txt
-pyserial
-flask
-requests
-```
-
-### Example Python service responsibilities
-
-The Python service can:
-- Open the serial connection to the AS608 sensor
-- Enroll fingerprints
-- Verify fingerprints
-- Return success or failure data to the backend
-- Optionally expose simple HTTP endpoints that the Node backend can call
-
-Python support for optical fingerprint sensors is commonly built around serial access, and Adafruit’s optical fingerprint documentation also highlights hardware UART support as part of Python-based sensor communication workflows [web:738]. Python libraries and forks specifically supporting AS608 also exist and can reduce low-level protocol work if you do not want to implement the serial command layer from scratch [web:740].
-
----
-
-## Example AS608 Python service
-
-```python
-# python/fingerprint_service.py
-from flask import Flask, request, jsonify
-import serial
-
-app = Flask(__name__)
-
-SERIAL_PORT = "COM3"   # change for your system, e.g. /dev/ttyUSB0 on Linux
-BAUD_RATE = 57600
-
-def connect_sensor():
-    return serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
-
-@app.route("/enroll", methods=["POST"])
-def enroll():
-    data = request.get_json()
-    user_id = data.get("userId")
-
-    if not user_id:
-        return jsonify({"error": "userId is required"}), 400
-
-    try:
-        sensor = connect_sensor()
-
-        # Replace this with real AS608 enroll logic
-        # Example: send command packets to sensor, capture finger, store template, etc.
-
-        sensor.close()
-
-        return jsonify({
-            "message": "Fingerprint enrolled successfully",
-            "userId": user_id,
-            "success": True
-        }), 200
-
-    except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "success": False
-        }), 500
-
-if __name__ == "__main__":
-    app.run(port=8000, debug=True)
-```
-
-This sample shows the service shape only. Real enrollment must implement the AS608 command flow for image capture, conversion, and template storage, which is reflected in common AS608 examples that initialize the sensor, capture an image, and convert it into an internal template before enrollment completes [web:732][web:736].
-
----
-
-## Backend to Python communication
-
-Your Node.js backend can call the Python service when a merchant taps **Verify fingerprint** in the mobile app.
-
-Example:
-
-```js
-const axios = require("axios");
-
-const response = await axios.post(`${process.env.PYTHON_SERVICE_URL}/enroll`, {
-  userId: foundUser.id,
-});
-```
-
-This keeps the hardware communication inside Python while the backend remains responsible for authentication, permissions, and app-facing API responses.
-
----
-
-## Example merchant withdraw endpoint
-
-```js
-router.post("/withdraw", authMerchant, async (req, res) => {
-  try {
-    const { amount } = req.body;
-    const numericAmount = Number(amount);
-
-    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
-      return res.status(400).json({ error: "Please provide a valid withdrawal amount" });
-    }
-
-    const merchant = await Merchant.findById(req.merchantId);
-
-    if (!merchant) {
-      return res.status(404).json({ error: "Merchant not found" });
-    }
-
-    const currentBalance = Number(merchant.balance || 0);
-
-    if (numericAmount > currentBalance) {
-      return res.status(400).json({ error: "Insufficient wallet balance" });
-    }
-
-    merchant.balance = currentBalance - numericAmount;
-    await merchant.save();
-
-    return res.status(200).json({
-      message: "Withdrawal successful",
-      balance: merchant.balance,
-      merchant,
-    });
-  } catch (err) {
-    return res.status(500).json({ error: "Server error" });
-  }
-});
+cd frontend
+npx expo start     # Scan QR with Expo Go app
 ```
 
 ---
 
-## Local merchant withdrawal history
+## 📁 Project Structure
 
-The mobile app can store withdrawal history locally using AsyncStorage so merchants can still see recent withdrawals without needing a dedicated MongoDB transaction collection immediately. AsyncStorage is commonly used in React Native apps for lightweight persistence such as retaining locally stored app state or records between sessions [web:669][web:665].
-
-Example key:
-
-```js
-const merchantStorageKey = `merchant_withdrawals_${user?.id || user?.company_name}`;
 ```
-
-If logout clears the entire AsyncStorage store, these local withdrawals will also be deleted, so logout should remove only auth-related keys if the history needs to remain on the device [web:663][web:671].
+fingerpay/
+├── AS608/                          # Python fingerprint sensor service
+│   ├── fingerprint/                #   Low-level AS608 driver library
+│   │   ├── __init__.py
+│   │   ├── lib.py                  #   Serial protocol implementation
+│   │   └── utils.py                #   Utility functions
+│   ├── app.py                      #   Flask REST API (enrol/match/delete/health)
+│   ├── enrol.py                    #   CLI — enrol fingerprint to sensor
+│   ├── enroll_mongo.py             #   CLI — enrol + store template in MongoDB
+│   ├── match_mongo.py              #   CLI — match against DB templates
+│   ├── delete.py                   #   CLI — delete from sensor flash
+│   ├── requirements.txt
+│   ├── setup.py
+│   └── manual.pdf                  # AS608 datasheet
+│
+├── backend/                        # Node.js + Express REST API
+│   ├── src/
+│   │   ├── server.js               #   Entry point — starts Express + MongoDB
+│   │   ├── app.js                  #   Express app with route mounting
+│   │   ├── config/
+│   │   │   ├── db.js               #   MongoDB connection config
+│   │   │   └── env.js              #   Environment variable loader
+│   │   ├── models/
+│   │   │   ├── User.js             #   Customer schema (balance, card, bank, biometric)
+│   │   │   ├── Merchant.js         #   Merchant schema (company, VAT, license, balance)
+│   │   │   ├── Transaction.js      #   Transaction record (user↔merchant, amount)
+│   │   │   ├── Biometric.js        #   Biometric link reference
+│   │   │   ├── EmailCode.js        #   OTP storage for email verification
+│   │   │   └── AuditLog.js         #   Audit trail
+│   │   ├── controllers/
+│   │   │   ├── authController.js   #   Email OTP send & verify
+│   │   │   ├── userController.js   #   CRUD, login, balance
+│   │   │   ├── merchantController.js # Register, login, transactions, withdraw
+│   │   │   ├── paymentController.js  # Process biometric & standard payments
+│   │   │   ├── biometricController.js # Proxy to Python sensor service
+│   │   │   ├── transactionController.js # Charge customer, process tx
+│   │   │   ├── bankController.js   #   Bank transfer operations
+│   │   │   └── cardController.js   #   Card top-up operations
+│   │   ├── routes/
+│   │   │   ├── userRoutes.js
+│   │   │   ├── merchantRoutes.js
+│   │   │   ├── paymentRoutes.js
+│   │   │   ├── biometricRoute.js
+│   │   │   ├── authRoutes.js
+│   │   │   └── bankRoutes.js
+│   │   ├── middleware/
+│   │   │   ├── authMiddleware.js   #   JWT verification
+│   │   │   ├── merchantAuth.js     #   Merchant-specific JWT
+│   │   │   ├── errorHandler.js     #   Global error handler
+│   │   │   └── validateRequest.js  #   Request validation
+│   │   ├── services/
+│   │   │   ├── biometricService.js #   Python API client
+│   │   │   ├── paymentService.js   #   Payment logic
+│   │   │   └── loggingService.js   #   Audit logging
+│   │   └── utils/
+│   │       ├── constants.js
+│   │       └── responseFormatter.js
+│   ├── package.json
+│   └── .env
+│
+├── frontend/                       # React Native (Expo) mobile app
+│   ├── App.js                      #   Entry point
+│   ├── src/
+│   │   ├── App.jsx                 #   Root component with providers
+│   │   ├── config/
+│   │   │   └── env.js              #   API base URL
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx     #   Auth state (login/logout/token/role)
+│   │   ├── navigation/
+│   │   │   └── AppNavigator.jsx    #   Stack + Tab navigation
+│   │   ├── screens/
+│   │   │   ├── SplashScreen.jsx    #   Animated splash
+│   │   │   ├── LoginScreen.jsx     #   Customer login
+│   │   │   ├── SignUpScreen.jsx    #   Customer registration
+│   │   │   ├── HomeScreen.jsx      #   Customer dashboard
+│   │   │   ├── MoneyScreen.jsx     #   Wallet — add funds
+│   │   │   ├── PayPointsScreen.jsx #   Find merchants
+│   │   │   ├── VerifyAccountScreen.jsx # Email OTP verification
+│   │   │   ├── CardDetailsScreen.jsx   # Card top-up form
+│   │   │   ├── BankDetailsScreen.jsx   # Bank transfer form
+│   │   │   ├── EnrolmentScreen.jsx     # Fingerprint enrolment
+│   │   │   ├── VerifyFingerPrintScreen.jsx # Fingerprint verification
+│   │   │   ├── PaymentScreen.jsx       # Merchant terminal UI
+│   │   │   ├── HistoryScreen.jsx       # Merchant transaction history
+│   │   │   ├── WithdrawScreen.jsx      # Merchant withdrawal
+│   │   │   ├── ProfileScreen.jsx       # User/merchant profile
+│   │   │   ├── FingerprintSuccessScreen.jsx # Post-verify success
+│   │   │   └── PaymentResultScreen.jsx # Payment result
+│   │   ├── components/
+│   │   │   ├── BottomNavBar.jsx   #   Customer bottom tabs
+│   │   │   ├── MerchantTabs.jsx   #   Merchant bottom tabs
+│   │   │   ├── AmountInput.jsx
+│   │   │   ├── PrimaryButton.jsx
+│   │   │   └── TransactionSummary.jsx
+│   │   ├── services/
+│   │   │   ├── api.js             #   Axios API client
+│   │   │   ├── biometricService.js#   Biometric API calls
+│   │   │   └── storageService.js  #   AsyncStorage helpers
+│   │   └── utils/
+│   │       ├── formatCurrency.js
+│   │       └── validation.js
+│   ├── app.json
+│   └── package.json
+│
+└── Screenshots/                    # App screenshots for README
+```
 
 ---
 
-## Role-based theming
+## 🔌 API Endpoints
 
-Merchant theming can be determined by checking whether the logged-in user has a `company_name` value:
-
-```js
-const isMerchant = !!user?.company_name?.trim();
-```
-
-Optional chaining is useful here because it safely handles missing fields without throwing runtime errors when a nested property does not exist [web:654][web:662].
-
----
-
-## API endpoints
-
-### Auth
-- `POST /auth/login`
-- `POST /auth/send-email-code`
-- `POST /auth/verify-email-code`
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/user/login` | Customer login |
+| POST | `/api/user/register` | Customer registration |
+| POST | `/api/merchant/login` | Merchant login |
+| POST | `/api/merchant/register` | Merchant registration |
+| POST | `/api/auth/send-code` | Send email OTP |
+| POST | `/api/auth/verify-code` | Verify email OTP |
 
 ### User
-- `GET /user/me`
-- `POST /user/me/default-payment`
-- `POST /user/verify-credentials`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/user/me` | Get current user profile |
+| GET | `/api/user/transactions` | Get user transactions |
+| GET | `/api/user/:id` | Get user by ID |
+| POST | `/api/user/verify-credentials` | Verify email + password |
 
 ### Merchant
-- `GET /merchant/me`
-- `POST /merchant/withdraw`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/merchant/me` | Get merchant profile |
+| GET | `/api/merchant/transactions` | Get merchant transaction history |
+| POST | `/api/merchant/withdraw` | Withdraw wallet funds |
 
-### Biometric
-- `POST /biometric/enroll`
+### Payments
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/payments/pay-with-biometric` | Pay using biometric ID |
+| POST | `/api/payments/pay` | Pay with default method |
+| POST | `/api/transactions/pay` | Merchant charges customer (auth) |
+| POST | `/api/transactions/process` | Process payment transaction |
 
-You can also add:
-- `POST /biometric/verify`
-- `GET /merchant/withdrawals`
-- `POST /merchant/save-fingerprint-status`
+### Biometric (Fingerprint)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/biometric/enroll` | Enrol fingerprint (proxies to Python) |
+| POST | `/api/biometric/verify` | Verify fingerprint (proxies to Python) |
+
+### Python Sensor Service (port 5001)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/enroll` | Capture finger twice, store template |
+| POST | `/match` | Match fresh finger against DB templates |
+| POST | `/delete` | Delete all templates from sensor flash |
+| GET | `/health` | Sensor connectivity check |
+
+### Banking & Cards
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/bank/users` | List bank users |
+| GET | `/api/bank/users/:id` | Get bank user by ID |
 
 ---
 
-## Running the full system
+## 🔐 How Fingerprint Matching Works
 
-### Start MongoDB
-Make sure MongoDB is running locally or your cloud database is accessible.
+1. **Enrolment**: User places finger twice → AS608 sensor captures two images → features are extracted into internal buffers → a combined 512‑byte template is generated → stored in MongoDB (`fingerpay.biometrics`) and optionally on the sensor's onboard flash.
 
-### Start backend
+2. **Matching**: User places finger once → sensor captures image and extracts features into Buffer 2 → system loops through every stored template in MongoDB → each template is written to Buffer 1 → sensor's hardware compares Buffer 1 vs Buffer 2 → if score exceeds threshold, match is confirmed → associated user is returned.
+
+3. **Security**: All biometric template data stays in MongoDB. The Node.js backend never handles raw template bytes — it proxies through the Python Flask service which communicates directly with the sensor over USB/UART.
+
+---
+
+## 🧪 Running Individual Scripts
+
+The `AS608/` directory includes standalone CLI scripts for testing the sensor independently of the web app:
+
 ```bash
-cd backend
-npm install
-npm run dev
-```
+# Enrol a fingerprint (sensor-only, no DB)
+python AS608/enrol.py
 
-### Start Python service
-```bash
-cd python
-pip install -r requirements.txt
-python fingerprint_service.py
-```
+# Enrol + store template in MongoDB
+python AS608/enroll_mongo.py
 
-### Start frontend
-```bash
-cd frontend
-npm install
-npx expo start
+# Match against templates in MongoDB
+python AS608/match_mongo.py
+
+# Delete all templates from sensor flash
+python AS608/delete.py
 ```
 
 ---
 
-## Recommended environment variables
+## 🛠️ Tech Stack
 
-### Frontend
-```env
-API_BASE_URL=http://YOUR_LOCAL_IP:5000
-```
-
-### Backend
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/fingerpay
-JWT_SECRET=your_secret_key
-PYTHON_SERVICE_URL=http://127.0.0.1:8000
-```
-
-### Python
-```env
-SERIAL_PORT=COM3
-BAUD_RATE=57600
-```
-
-AS608 examples commonly show a `57600` serial speed during initialization, though this should still be confirmed against the specific module and adapter being used in your environment [web:732][web:736].
+| Category | Technology |
+|----------|-----------|
+| **Frontend** | React Native 0.72, Expo 49, React Navigation 6 |
+| **Backend** | Node.js, Express 4, Mongoose 8, JWT, bcryptjs |
+| **Database** | MongoDB |
+| **Biometric** | AS608 optical sensor, Python 3, Flask, PySerial |
+| **Email** | Nodemailer (Gmail SMTP) |
+| **HTTP Client** | Axios |
 
 ---
 
-## Security notes
+## 🤝 Contributing
 
-- Store JWT secrets in environment variables
-- Never hardcode production credentials
-- Protect merchant-only routes with authentication middleware
-- Validate all withdrawal and biometric requests on the backend
-- Restrict Python service access so it is not publicly exposed without backend control
-
-Authorization middleware that reads Bearer tokens from request headers is a standard pattern for protected Express APIs [web:690][web:694].
+This is a personal project. Feel free to fork, open issues, or submit pull requests.
 
 ---
 
-## Future improvements
+## ⚠️ Notes
 
-- Store fingerprint enrollment metadata in MongoDB
-- Add a proper `transactions` collection
-- Add merchant settlement reports
-- Add real biometric verification templates and matching logic
-- Add audit logging for enrollments and withdrawals
-- Replace local withdrawal history with backend persistence
-- Add Docker support for backend and Python service
-- Add CI/CD workflows
-
----
-
-## Troubleshooting
-
-### App cannot reach backend
-- Check `API_BASE_URL`
-- Use your computer’s IP address, not `localhost`
-- Ensure backend server is running on the same network
-
-### Python service cannot access AS608
-- Confirm serial port name
-- Check TX/RX wiring
-- Confirm baud rate
-- Make sure another app is not already using the serial port
-
-### Fingerprint enrollment fails
-- Verify sensor power
-- Confirm UART connection
-- Confirm the Python service is using the correct serial device
-- Check whether the AS608 library or serial command protocol is correctly implemented
-
-### Merchant history disappears after logout
-- Do not use `AsyncStorage.clear()`
-- Remove only token and auth keys during logout
-
----
-
-## Screens to showcase
-
-For a good GitHub presentation, include screenshots or short recordings of:
-- Login
-- Verify account
-- Merchant payment screen
-- Withdraw to bank
-- Fingerprint verification
-- Merchant profile
-- Merchant bottom tabs
-
-Clear visuals, setup instructions, and architecture notes make project READMEs easier for contributors to understand and reuse [web:718][web:730].
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push the branch
-5. Open a pull request
-
----
-
-## Author
-
-Built as a full-stack fintech and biometric verification project using React Native, Node.js, MongoDB, Python, and the AS608 fingerprint sensor.
+- The `.env` file contains placeholder credentials — **do not use them in production**.
+- The JWT secret and email app password should be rotated and stored securely.
+- The Python fingerprint service (`app.py`) must be running on the same machine as the AS608 sensor (USB‑connected).
+- The mobile app connects to the backend over your local network — ensure the backend IP is correctly set in `frontend/src/config/env.js`.
